@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Einkaufsliste</title>
+    <style>
+        /* CSS-Stile hier einfügen */
+    </style>
+    <script src="script.js"></script>
+
+</head>
+<body>
+    <div id="container">
+        <h1>Einkaufsliste</h1>
+        <input type="text" id="itemInput" placeholder="Neues Element eingeben...">
+        <button id="addItemBtn">Hinzufügen</button>
+        <div id="listContainer"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const addItemBtn = document.getElementById('addItemBtn');
+            const itemInput = document.getElementById('itemInput');
+            const listContainer = document.getElementById('listContainer');
+
+            // Laden der gespeicherten Liste beim Laden der Seite
+            loadSavedList();
+
+            addItemBtn.addEventListener('click', function() {
+                const itemName = itemInput.value.trim();
+                if (itemName !== '') {
+                    addItem(itemName);
+                    saveList();
+                    itemInput.value = '';
+                } else {
+                    alert('Bitte geben Sie einen Artikel ein.');
+                }
+            });
+
+            function loadSavedList() {
+                fetch('/getShoppingList')
+                    .then(response => response.json())
+                    .then(data => {
+                        listContainer.innerHTML = data;
+                        setDeleteButtonsEvent();
+                    })
+                    .catch(error => console.error('Error fetching shopping list:', error));
+            }
+
+            function saveList() {
+                const itemList = Array.from(document.querySelectorAll('.item span')).map(item => item.textContent);
+                fetch('/saveShoppingList', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ shoppingList: itemList })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to save shopping list');
+                    }
+                })
+                .catch(error => console.error('Error saving shopping list:', error));
+            }
+
+            function addItem(itemName) {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'item';
+                itemDiv.innerHTML = `
+                    <span>${itemName}</span>
+                    <button class="deleteBtn">Löschen</button>
+                `;
+                listContainer.appendChild(itemDiv);
+                setDeleteButtonsEvent();
+            }
+
+            function setDeleteButtonsEvent() {
+                const deleteBtns = document.querySelectorAll('.deleteBtn');
+                deleteBtns.forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        btn.parentElement.remove();
+                        saveList();
+                    });
+                });
+            }
+        });
+    </script>
+</body>
+</html>
