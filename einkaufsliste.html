@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Einkaufsliste</title>
+    <style>
+        /* CSS-Stile hier einfügen */
+    </style>
+</head>
+<body>
+    <div id="container">
+        <h1>Einkaufsliste</h1>
+        <input type="text" id="itemInput" placeholder="Neues Element eingeben...">
+        <button id="addItemBtn">Hinzufügen</button>
+        <div id="listContainer"></div>
+    </div>
+
+    <!-- Unsichtbarer Bereich zur Speicherung der Einkaufsliste -->
+    <div id="hiddenData" style="display: none;">
+        <!-- Hier wird die Einkaufsliste gespeichert -->
+        <!-- Beispiel: <span>Item 1</span><span>Item 2</span> -->
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const addItemBtn = document.getElementById('addItemBtn');
+            const itemInput = document.getElementById('itemInput');
+            const listContainer = document.getElementById('listContainer');
+            const hiddenData = document.getElementById('hiddenData');
+
+            // Laden der gespeicherten Liste beim Laden der Seite
+            loadSavedList();
+
+            addItemBtn.addEventListener('click', function() {
+                const itemName = itemInput.value.trim();
+                if (itemName !== '') {
+                    addItem(itemName);
+                    saveList();
+                    itemInput.value = '';
+                } else {
+                    alert('Bitte geben Sie einen Artikel ein.');
+                }
+            });
+
+            function loadSavedList() {
+                const savedList = hiddenData.innerHTML;
+                listContainer.innerHTML = savedList;
+                setDeleteButtonsEvent();
+            }
+
+            function saveList() {
+                hiddenData.innerHTML = listContainer.innerHTML;
+            }
+
+            function addItem(itemName) {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'item';
+                itemDiv.innerHTML = `
+                    <span>${itemName}</span>
+                    <button class="deleteBtn">Löschen</button>
+                `;
+                listContainer.appendChild(itemDiv);
+                setDeleteButtonsEvent();
+            }
+
+            function setDeleteButtonsEvent() {
+                const deleteBtns = document.querySelectorAll('.deleteBtn');
+                deleteBtns.forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        btn.parentElement.remove();
+                        saveList();
+                    });
+                });
+            }
+        });
+    </script>
+</body>
+</html>
